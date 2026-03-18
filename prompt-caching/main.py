@@ -48,7 +48,7 @@ question=[{
 # print(response.choices[0].message.content)
 
 
-
+# Keep the prompt exactly same as much as you can to enable the prompt caching implicitly
 question[0]["content"]= question[0]["content"] + "\n\n For context, here is the entire text of Hamlet:\n\n"+hamlet_text
 
 response = completion(model="ollama/qwen2.5-coder:7b", messages=question, api_base="http://localhost:11434")
