@@ -18,7 +18,7 @@ There's no pressure to be perfect here. This is a space for experimentation, bre
 
 | # | Project | Description | Status |
 |---|---------|-------------|--------|
-| 01 | [**AI Web Scrapper**](./01-llm-chat/) | Know summary of a website directly from terminal with using AI|  Completed |
+| 01 | [**AI Web Scrapper**](./ai-web-scraper/) | Know summary of a website directly from terminal with using AI|  Completed |
 | 02 | [**LLM vs LLM Chat**](./01-llm-chat/) | Two LLMs talk to each other in an autonomous loop |  In progress |
 
 > More projects will be added as the learning journey continues.
