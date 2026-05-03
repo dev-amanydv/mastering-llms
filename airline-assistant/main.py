@@ -138,7 +138,7 @@ def sendPrompt(messages, input):
     )
 
     print(f"\nAssistant: {response.output_text}\n")
-    print(f"\n\n\n*************************\n{response.model_dump_json(indent=2)}\n")
+    # print(f"\n\n\n*************************\n{response.model_dump_json(indent=2)}\n")
 
 
     return
