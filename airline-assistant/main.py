@@ -15,7 +15,7 @@ else:
     print("OpenAI Endpoint not set")
 if azure_api_key:
     print(f"Azure api key exist & starts with {azure_api_key[:5]}\n\n")
-else:
+else: 
     print("Azure api key not set\n\n\n")
 
 model="gpt-5-mini"
