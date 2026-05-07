@@ -1,44 +1,42 @@
-from transformers import FastVlmPreTrainedModel
-from platform import platform
-import shutil
 import os
 import platform
+import shutil
 import subprocess
 
-#shutle is used to check if a command exists in PATH
-#subprocess is used to run terminal commands from python
+# ------------------------- helpers -------------------------
 
-print(f"OS Env: {os.environ}")
-print(f"Platform: {os.cpu_count()}")
 
 def _run(cmd, timeout=3):
-    """
-    Run a command safely. Returns stdout text or ''.
-    Accepts either a string(shell) or list(no shell).
-    """
+    """Run a command safely. Returns stdout text or ''.
+    Accepts either a string (shell) or list (no shell)."""
     try:
         if isinstance(cmd, str):
             return subprocess.check_output(
                 cmd, shell=True, text=True, stderr=subprocess.DEVNULL, timeout=timeout
-            )
-        else: 
+            ).strip()
+        else:
             return subprocess.check_output(
                 cmd, shell=False, text=True, stderr=subprocess.DEVNULL, timeout=timeout
-            )
+            ).strip()
     except Exception:
         return ""
-    
+
+
 def _first_line(s: str) -> str:
     s = (s or "").strip()
     return s.splitlines()[0].strip() if s else ""
 
+
 def _which(name: str) -> str:
     return shutil.which(name) or ""
 
-def _bool_from_output(s: str) -> bool:
-    return s.strip() in { "1", "true", "True", "Yes", "YES", "yes"}
 
-#------------------- OS & env ----------------------
+def _bool_from_output(s: str) -> bool:
+    return s.strip() in {"1", "true", "True", "YES", "Yes", "yes"}
+
+
+# ------------------------- OS & env -------------------------
+
 
 def _os_block():
     sysname = platform.system()  # 'Windows', 'Darwin', 'Linux'
@@ -97,7 +95,9 @@ def _os_block():
         "target_triple": target,
     }
 
+
 # ------------------------- package managers -------------------------
+
 
 def _package_managers():
     sysname = platform.system()
@@ -118,7 +118,9 @@ def _package_managers():
                 pms.append(pm)
     return pms
 
+
 # ------------------------- CPU (minimal) -------------------------
+
 
 def _cpu_block():
     sysname = platform.system()
@@ -184,7 +186,9 @@ def _cpu_block():
         "simd": sorted(set(simd)),
     }
 
+
 # ------------------------- toolchain presence -------------------------
+
 
 def _toolchain_block():
     def ver_line(exe, args=("--version",)):
@@ -217,48 +221,41 @@ def _toolchain_block():
         "linkers": {"ld_lld": lld},
     }
 
+
 # ------------------------- public API -------------------------
+
 
 def retrieve_system_info():
     """
     Returns a compact dict with enough info for an LLM to:
-        - Pick an install path (winget/choco/scoop, Homebrew/Xcode CLT, apt/dnf/...),
-        - Choose a compiler family (MSVC/clang/gcc),
-        - Suggest safe optimization flags (e.g., -03/-march=native, or MSVC /02),
-        - Decide on a build system (cmake+ninja) and parallel -j value
+      - Pick an install path (winget/choco/scoop, Homebrew/Xcode CLT, apt/dnf/...),
+      - Choose a compiler family (MSVC/clang/gcc),
+      - Suggest safe optimization flags (e.g., -O3/-march=native or MSVC /O2),
+      - Decide on a build system (cmake+ninja) and parallel -j value.
     """
-
     return {
         "os": _os_block(),
-        "package_managers": _cpu_block(),
+        "package_managers": _package_managers(),
         "cpu": _cpu_block(),
-        "toolchain": _toolchain_block()
+        "toolchain": _toolchain_block(),
     }
+
 
 def rust_toolchain_info():
     """
     Return a dict with Rust-related settings:
-        - presence and paths for rustc / cargo / rustup / rust-analyzer
-        - versions
-        - active/default toolchain (if rustup is present)
-        - installed targets
-        - common env vars (CARGO_HOME, RUSTUP_HOME, RUSTFLAGS, CARGO_BUILD_TARGET)
-        - simple execution examples
+      - presence and paths for rustc / cargo / rustup / rust-analyzer
+      - versions
+      - active/default toolchain (if rustup is present)
+      - installed targets
+      - common env vars (CARGO_HOME, RUSTUP_HOME, RUSTFLAGS, CARGO_BUILD_TARGET)
+      - simple execution examples
     Works on Windows, macOS, and Linux. Uses the existing helpers: _run, _which, _first_line.
     """
-
     info = {
         "installed": False,
-        "rustc": {
-            "path": "",
-            "version": "host_triple",
-            "release": "",
-            "commit_hash": ""
-        },
-        "cargo": {
-            "path": "",
-            "version": ""
-        },
+        "rustc": {"path": "", "version": "", "host_triple": "", "release": "", "commit_hash": ""},
+        "cargo": {"path": "", "version": ""},
         "rustup": {
             "path": "",
             "version": "",
@@ -276,6 +273,7 @@ def rust_toolchain_info():
         },
         "execution_examples": [],
     }
+
     # Paths
     rustc_path = _which("rustc")
     cargo_path = _which("cargo")
@@ -359,6 +357,3 @@ def rust_toolchain_info():
     info["env"]["RUSTUP_HOME"] = _maybe_default_home(info["env"]["RUSTUP_HOME"], ".rustup")
 
     return info
-
-
-
